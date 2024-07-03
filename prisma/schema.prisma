@@ -26,8 +26,8 @@ model Tracker {
 model Signal {
     id        String   @id @default(cuid()) @map("_id")
     createdAt DateTime @default(now())
-    trackerId String
-    tracker   Tracker  @relation(fields: [trackerId], references: [id])
+    refId     String
+    tracker   Tracker  @relation(fields: [refId], references: [id])
     ip        String
     userAgent String
 }

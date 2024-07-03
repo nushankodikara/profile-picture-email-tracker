@@ -1,3 +1,4 @@
+import { prisma } from '@/library/prisma';
 import crypto from 'node:crypto';
 
 function getGravatarUrl(email: string, size = 80) {
@@ -12,14 +13,29 @@ export async function GET(request: Request) {
     const email = searchParams.get('email')
     const refId = searchParams.get('refId')
     const size = searchParams.get('size')
+    const userIP = request.headers.get('x-forwarded-for')
+    const userAgent = request.headers.get('User-Agent')
 
     if (email === null || refId === null) {
         return new Response('Missing email or refId', { status: 400 })
     }
 
-    // Fetch the user's Gravatar image
+    // Fetch the user's gravatar image
     const gravatarUrl = getGravatarUrl(email, Number.parseInt(size || "80"))
-    console.log(gravatarUrl)
+
+    // Add Signal to the Tracker
+    try {
+        await prisma.signal.create({
+            data: {
+                refId: refId,
+                ip: userIP || "Not Available",
+                userAgent: userAgent || "Not Available",
+            }
+        })
+    } catch (error) {
+        console.error(error)
+        return new Response('Error adding signal', { status: 500 })
+    }
 
     try {
         const response = await fetch(gravatarUrl);
