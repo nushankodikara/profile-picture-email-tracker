@@ -38,7 +38,10 @@ export async function GET(request: Request) {
     }
 
     try {
-        const response = await fetch(gravatarUrl);
+        const response = await fetch(gravatarUrl, {
+            cache: 'force-cache',
+            next: { revalidate: 86400 }
+        });
         if (!response.ok) {
             throw new Error('Failed to fetch image');
         }
